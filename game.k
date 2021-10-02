@@ -4,6 +4,7 @@
 /i shipTR;arne;http://games.tangentcode.com/ld49/sprites/ship-thrust-r.png
 /i alien0;arne;http://games.tangentcode.com/ld49/sprites/alien0.png
 /i human;arne;http://games.tangentcode.com/ld49/sprites/human.png
+/i beam;arne;http://games.tangentcode.com/ld49/sprites/beam.png
 
 fc:48 / framecount for animated gif recorder
 
@@ -103,17 +104,21 @@ minimap: {
 shipSL: |:'shipSR
 shipTL: |:'shipTR
 phaserL:|:phaserR: 3 4 7 8
+bmOfs: 10 22 / beam offset from upper left of alien ship
 stop: [shipTL:`shipSL; shipTR:`shipSR
        shipSL:`shipSL; shipSR:`shipSR]
 
 draw: {
+  a:`arne
   s: `shipTL`shipTR[x[`shD]=1]
 
   / -- items in this section move in world space
-  r:((,x[`shXY]; `arne; $[abs[*dir]; s; stop[s]])
-     (x[`phXY]; `arne; `phaserR)
-     (+x[`alX`alY]; `arne; `alien0)
-     (x[`huXY];`arne;`human))
+  alXY: +x[`alX`alY]
+  r:((,x[`shXY];      a; $[abs[*dir]; s; stop[s]])
+     (x[`phXY];       a; `phaserR)
+     (bmOfs +/: alXY@&x[`alBE]; a; `beam)
+     (alXY;           a; `alien0)
+     (x[`huXY];       a; `human))
   r,:gnd
   r:.[r;(;0); +'\:; x[`camXY]]
 
