@@ -53,9 +53,13 @@ gndH: _20+20*pn[0.1;0.1;]'?#gndW
 gnd: (box'[gndX;200-gndH;gndW;gndH])
 gnd: gnd {(x;("transparent";y))}' (#gnd)?earth
 
-mapw: 120; maph: 15
-mapc: ("white";"black")
-minimap: { ,(box[(w-mapw)%2;5;mapw;maph];mapc) }
+mapw: 120; maph: 15; mapy: 5
+mapbc: ("white";"black") / map box color
+mapcc: (solarized@2;"black") / map cam color
+minimap: {
+  cw: mapw%5 / cam width on the minimap
+  ((box[(w-mapw)%2;mapy;mapw;maph];mapbc)
+   (box[(w-cw)%2;mapy+1;cw;maph-2];mapcc))}
 
 draw: {
   s: `shipTL`shipTR[x[`shD]=1]
