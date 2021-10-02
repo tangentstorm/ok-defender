@@ -19,12 +19,6 @@ fib:5{x,+/-2#x}/1 1 / first few fibonacci numbers
 gndW: {(1+*&worldW<+\x)#x}20*fib@50?#fib
 worldW: +/ gndW / refine width to exact match
 
-
-spawnHumans: {
-  :,(152 92) / human coordinates
-}
-
-
 / -- terrain generation ---
 box: {[x;y;w;h](x,y)+/:(0 0;w,0;w,h;0,h)}
 band: { (box[0;30*x;w;30]; ("transparent";solarized@x)) }
@@ -35,6 +29,13 @@ gndH: _20+20*pn[0.1;0.1;]'?#gndW
 gnd: (box'[gndX;200-gndH;gndW;gndH])
 gnd: gnd {(x;("transparent";y))}' (#gnd)?gndC
 
+
+/ -- add humans to the terrain
+spawnHumans: {
+  hw: #*human
+  hx: gndX + 0.5*gndW-hw  / x center of each tile
+  hy: 200-gndH+#human
+  hx,'hy }
 
 / -- inital setup
 once: [camXY: 0 0 / camera coordinates
