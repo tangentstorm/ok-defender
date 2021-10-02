@@ -9,8 +9,8 @@ fc:48 / framecount for animated gif recorder
 
 /-- setup
 w: 320; h: 200
-shSpd: 5
-phSpd: 16
+shSpd: 8
+phSpd: _shSpd*2.5
 
 / "world" is about 5 screens.
 / exact number comes from random terrain generation
@@ -62,8 +62,14 @@ draw: {
      (,152 92;`arne;`person))
   r,:gnd
   r:.[r;(;0); +'\:; x[`camXY]]
+  / r,:,(2 190;;~,/'+text@" "/$dir) / debug: show 'dir'
+  / r,:,(50 190;;~,/'+text@","/ 0,$ keys) / debug: show presesd keys
   / sky is fixed gradient. others are drawn relative to camera
   :sky,r}
 
- /(;      ;~,/'+text@" "/$dir)    )}
- /(;`arne;~,/'+text@","/ 0,$ keys))} / uncomment to show keys
+/ blank lines to compensate for status line in iKe:
+/
+/
+/
+/
+/
