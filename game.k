@@ -37,23 +37,25 @@ spawnHumans: {
   hy: 200-gndH+#human
   hx,'hy }
 
+/ -- add aliens to the list of aliens
+spawnAliens: {[n;alXY] alXY,(n?worldW),'0}
+
 / -- inital setup
 once: [camXY: 0 0 / camera coordinates
   shXY:50 50     / ship coordinates
   shD:1          / ship direction
-  huXY:spawnHumans()
-  phxy:()        / phaser blast locations (xy)
-  phdx:()]       / phaser blast directions (delta xy, where y=0)
+  huXY:spawnHumans[]
+  alXY:spawnAliens[5;()]
+  phXY:()        / phaser blast locations (xy)
+  phDX:()]       / phaser blast directions (delta xy, where y=0)
 
 tick: {
   x[`camXY]-: (shSpd, 0) * dir
   x[`shD]: d: (-1; x[`shD];1)[1+*dir]
   x[`shXY]+: shSpd*dir
-  x[`phxy]+: x[`phdx]
-  $[" " in keys; x[`phxy`phdx],:(,x[`shXY]+22 18;,(phSpd*d),0); `] / pew pew
+  x[`phXY]+: x[`phDX]
+  $[" " in keys; x[`phXY`phDX],:(,x[`shXY]+22 18;,(phSpd*d),0); `] / pew pew
   x}
-
-
 
 
 mapw: 120; maph: 15; mapy: 5
@@ -78,8 +80,8 @@ draw: {
 
   / -- items in this section move in world space
   r:((,x[`shXY]; `arne; $[abs[*dir]; s; stop[s]])
-     (x[`phxy]; `arne; `phaserR)
-     (,200 5; `arne; `alien0)
+     (x[`phXY]; `arne; `phaserR)
+     (x[`alXY]; `arne; `alien0)
      (x[`huXY];`arne;`human))
   r,:gnd
   r:.[r;(;0); +'\:; x[`camXY]]
