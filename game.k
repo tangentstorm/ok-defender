@@ -3,7 +3,7 @@
 /i shipSR;arne;http://games.tangentcode.com/ld49/sprites/ship-stop-r.png
 /i shipTR;arne;http://games.tangentcode.com/ld49/sprites/ship-thrust-r.png
 /i alien0;arne;http://games.tangentcode.com/ld49/sprites/alien0.png
-/i person;arne;http://games.tangentcode.com/ld49/sprites/person.png
+/i human;arne;http://games.tangentcode.com/ld49/sprites/human.png
 
 fc:48 / framecount for animated gif recorder
 
@@ -20,16 +20,27 @@ gndW: {(1+*&worldW<+\x)#x}20*fib@50?#fib
 worldW: +/ gndW / refine width to exact match
 
 
-/-- sprites --
-shipSL: |:'shipSR
-shipTL: |:'shipTR
-phaserL:|:phaserR: 3 4 7 8
-stop: [shipTL:`shipSL; shipTR:`shipSR
-       shipSL:`shipSL; shipSR:`shipSR]
+spawnHumans: {
+  :,(152 92) / human coordinates
+}
 
+
+/ -- terrain generation ---
+box: {[x;y;w;h](x,y)+/:(0 0;w,0;w,h;0,h)}
+band: { (box[0;30*x;w;30]; ("transparent";solarized@x)) }
+sky: band@'!6
+gndC: ("#b58900";"#859900";"#cb4b16")
+gndX:-1_0,+\gndW
+gndH: _20+20*pn[0.1;0.1;]'?#gndW
+gnd: (box'[gndX;200-gndH;gndW;gndH])
+gnd: gnd {(x;("transparent";y))}' (#gnd)?gndC
+
+
+/ -- inital setup
 once: [camXY: 0 0 / camera coordinates
-  shXY:50 50 / ship coordinates
+  shXY:50 50     / ship coordinates
   shD:1          / ship direction
+  huXY:spawnHumans()
   phxy:()        / phaser blast locations (xy)
   phdx:()]       / phaser blast directions (delta xy, where y=0)
 
@@ -42,16 +53,7 @@ tick: {
   x}
 
 
-box: {[x;y;w;h](x,y)+/:(0 0;w,0;w,h;0,h)}
-band: { (box[0;30*x;w;30]; ("transparent";solarized@x)) }
-sky: band@'!6
 
-earth: ("#b58900";"#859900";"#cb4b16")
-
-gndX:-1_0,+\gndW
-gndH: _20+20*pn[0.1;0.1;]'?#gndW
-gnd: (box'[gndX;200-gndH;gndW;gndH])
-gnd: gnd {(x;("transparent";y))}' (#gnd)?earth
 
 mapw: 120; maph: 15; mapy: 5
 mapbc: ("white";"black") / map box color
@@ -61,6 +63,15 @@ minimap: {
   ((box[(w-mapw)%2;mapy;mapw;maph];mapbc)
    (box[(w-cw)%2;mapy+1;cw;maph-2];mapcc))}
 
+
+
+/-- sprites --
+shipSL: |:'shipSR
+shipTL: |:'shipTR
+phaserL:|:phaserR: 3 4 7 8
+stop: [shipTL:`shipSL; shipTR:`shipSR
+       shipSL:`shipSL; shipSR:`shipSR]
+
 draw: {
   s: `shipTL`shipTR[x[`shD]=1]
 
@@ -68,7 +79,7 @@ draw: {
   r:((,x[`shXY]; `arne; $[abs[*dir]; s; stop[s]])
      (x[`phxy]; `arne; `phaserR)
      (,200 5; `arne; `alien0)
-     (,152 92;`arne;`person))
+     (x[`huXY];`arne;`human))
   r,:gnd
   r:.[r;(;0); +'\:; x[`camXY]]
 
