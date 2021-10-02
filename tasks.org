@@ -1,0 +1,37 @@
+#+title: (as yet untitled) oK defender clone
+
+* TODO pan camera across virtual landscape
+* TODO generate a landscape
+* TODO only draw sprites that are on screen
+
+* TODO spaceship inertia
+* TODO spawn humans (on the ground)
+* TODO spawn aliens (in the air)
+* TODO draw the minimap
+- single pixels for aliens, humans, and hero
+- generated from real map
+
+* TODO cylindrical topology
+(so you can go all around the world in x direction)
+
+* TODO keep score (maybe time survived, plus #saved?)
+time survived = f
+
+* TODO draw score (as some kind of clock)
+* TODO count how many people die
+* TODO end game when too many people die
+- this is a nihilistic game where you can never
+- win but only prolong the inevitable
+
+* TODO aliens abduct humans
+* TODO collision dection for phasers+aliens
+* TODO collision detection for ship+alien
+* TODO collision detection for ship + human
+* TODO collision detection for phasers + human
+* TODO garbage collect phasers
+- when they hit something
+- when they expire (each one should have a clock)
+* TODO screenflow
+** TODO game over
+** TODO title screen
+** TODO pause screen
