@@ -53,19 +53,28 @@ gndH: _20+20*pn[0.1;0.1;]'?#gndW
 gnd: (box'[gndX;200-gndH;gndW;gndH])
 gnd: gnd {(x;("transparent";y))}' (#gnd)?earth
 
+mapw: 120; maph: 15
+mapc: ("white";"black")
+minimap: { ,(box[(w-mapw)%2;5;mapw;maph];mapc) }
+
 draw: {
   s: `shipTL`shipTR[x[`shD]=1]
 
+  / -- items in this section move in world space
   r:((,x[`shXY]; `arne; $[abs[*dir]; s; stop[s]])
      (x[`phxy]; `arne; `phaserR)
      (,200 5; `arne; `alien0)
      (,152 92;`arne;`person))
   r,:gnd
   r:.[r;(;0); +'\:; x[`camXY]]
+
+  / -- everything below is fixed in place on-screen
+  r,:minimap x
+  r:sky,r
+  / -- debug helpers:
   / r,:,(2 190;;~,/'+text@" "/$dir) / debug: show 'dir'
   / r,:,(50 190;;~,/'+text@","/ 0,$ keys) / debug: show presesd keys
-  / sky is fixed gradient. others are drawn relative to camera
-  :sky,r}
+  :r}
 
 / blank lines to compensate for status line in iKe:
 /
