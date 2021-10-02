@@ -29,11 +29,18 @@ tick: {
   $[" " in keys; x[`phxy`phdx],:(,x[`xy]+22 18;,(phSpd*d),0); `] / pew pew
   x}
 
+
+box: {[x;y;w;h](x,y)+/:(0 0;w,0;w,h;0,h)}
+band: { (box[0;30*x;w;30]; ("transparent";solarized@x)) }
+sky: band@'!6
+
+palRocks: ,("#b58900")
 draw: {
   s: `shipTL`shipTR[x[`shD]=1]
- ((x[`xy]; `arne; $[abs[*dir]; s; stop[s]])
+ sky,((x[`xy]; `arne; $[abs[*dir]; s; stop[s]])
   (x[`phxy]; `arne; `phaserR)
   (200 5; `arne; `alien0)
-  (;`arne;`person) )}
+  (152 92;`arne;`person)
+  (box[160;84;20;20];("black";palRocks 0)) )}
  /(;      ;~,/'+text@" "/$dir)    )}
- /(;`arne;~,/'+text@","/0,$keys))} / uncomment to show keys
+ /(;`arne;~,/'+text@","/ 0,$ keys))} / uncomment to show keys
