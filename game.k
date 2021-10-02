@@ -6,7 +6,8 @@ fc:48 / framecount for animated gif recorder
 
 /-- setup
 w: 320; h: 200
-speed: 5
+shSpd: 5
+phSpd: 8
 
 /-- sprites --
 shipSL: |:'shipSR
@@ -16,14 +17,21 @@ stop: [shipTL:`shipSL; shipTR:`shipSR
        shipSL:`shipSL; shipSR:`shipSR]
 
 
-once: [xy:50 50;ship:`shipSR;phxy:();phdx:()]
+once: [xy:50 50
+  shipD:1
+  ship:`shipSR
+  phxy:()
+  phdx:()]
 tick: {
-  s: (`shipTL,x[`ship],`shipTR)[1+*dir]
+  d: (-1; x[`shD];1)[1+*dir]
+  s: `shipTL`shipTR[d=1]
   x[`ship]: $[abs[*dir]; s; stop[s]]
-  x[`xy]+: speed * dir }
+  x[`xy]+: shSpd*dir
+  x[`phxy]+: x[`phdx],'0
+  $[" " in keys; x[`phxy`phdx],:(,x[`xy]+22 18;phSpd*d); `] / pew pew
+  x}
 
 draw: { ((x[`xy]; `arne; x[`ship])
-         (x[`xy]+22 18; `arne; `phaser)
-         (200 5; `arne; `alien0))}
-
-
+         (x[`phxy]; `arne; `phaserR)
+         (200 5; `arne; `alien0) )}
+         /(;`arne;,/'+text@","/0,$keys))} / uncomment to show keys
