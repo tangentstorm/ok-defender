@@ -10,11 +10,11 @@ fc:48 / framecount for animated gif recorder
 /-- constants
 w: 320; h: 200
 shSpd: 8
-alYSpd: 0.3
+alSpd: 1.3
 phSpd: _shSpd*2.5
 seaLevel: 20
 beamRange: 32
-beamActivationDepth: h - beamRange+seaLevel+#human
+bad: h - beamRange+seaLevel+#human  / beam Activation Depth
 
 / "world" is about 5 screens.
 / exact number comes from random terrain generation
@@ -42,13 +42,15 @@ spawnHumans: {
   hx,'hy }
 
 / -- inital setup
-nInitAliens: 5
+nAL: 5
 once: [camXY: 0 0 / camera coordinates
   shXY:50 50     / ship coordinates
   shD:1          / ship direction
   huXY:spawnHumans[]
-  alX:nInitAliens?worldW
-  alY:nInitAliens#0
+  alX:nAL?worldW
+  alY:nAL#0
+  alHH:nAL#0     / bitmap: alien holding a human?
+  alIR:nAL#0     / bitmap: alien in range of target?
   phXY:()        / phaser blast locations (xy)
   phDX:()]       / phaser blast directions (delta xy, where y=0)
 
@@ -63,8 +65,18 @@ tick: {
   x[`shD]: d: (-1; x[`shD];1)[1+*dir]
   x[`shXY]+: shSpd*dir
 
-  x[`alX]+: sgn' x[`tgtX] - x[`alX]
-  x[`alY]: beamActivationDepth & alYSpd + x[`alY]
+
+  / stage 0: aliens drift down while centering in on target
+  s0: & ix: ~(hh: x[`alHH]) | ir:x[`alIR]
+
+  / !! working around dmend bug: https://github.com/JohnEarnest/ok/issues/95
+  alX:x[`alX]; tgtX:x[`tgtX]; alY:x[`alY]
+  alX[s0]+: alSpd * sgn' tgtX[s0] - alX[s0]
+  alY[s0]: bad & alSpd + alY[s0]
+  x[`alX`alY]:(alX; alY)
+  / !! /workaround
+
+  x[`alIR]: ix & bad = _ x[`alY]
 
   x[`phXY]+: x[`phDX]
   $[" " in keys; x[`phXY`phDX],:(,x[`shXY]+22 18;,(phSpd*d),0); `] / pew pew
@@ -87,7 +99,7 @@ shipTL: |:'shipTR
 phaserL:|:phaserR: 3 4 7 8
 stop: [shipTL:`shipSL; shipTR:`shipSR
        shipSL:`shipSL; shipSR:`shipSR]
-once[`a]
+
 draw: {
   s: `shipTL`shipTR[x[`shD]=1]
 
