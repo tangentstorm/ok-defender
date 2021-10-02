@@ -34,13 +34,18 @@ box: {[x;y;w;h](x,y)+/:(0 0;w,0;w,h;0,h)}
 band: { (box[0;30*x;w;30]; ("transparent";solarized@x)) }
 sky: band@'!6
 
-palRocks: ,("#b58900")
+fib:2_8{x,+/-2#x}/1 1 / first 8 fibonacci numbers after 1
+0*fib@50?8
+earth: ("#b58900";"#859900";"#cb4b16")
+n:16; ground: (box[;180;20;20]@'20*!n) {(x;("black";y))}' earth@n?3
+
 draw: {
   s: `shipTL`shipTR[x[`shD]=1]
  sky,((x[`xy]; `arne; $[abs[*dir]; s; stop[s]])
   (x[`phxy]; `arne; `phaserR)
   (200 5; `arne; `alien0)
-  (152 92;`arne;`person)
-  (box[160;84;20;20];("black";palRocks 0)) )}
+  (152 92;`arne;`person)),ground}
  /(;      ;~,/'+text@" "/$dir)    )}
  /(;`arne;~,/'+text@","/ 0,$ keys))} / uncomment to show keys
+
+
