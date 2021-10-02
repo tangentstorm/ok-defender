@@ -51,6 +51,7 @@ once: [camXY: 0 0 / camera coordinates
   alY:nAL#0
   alHH:nAL#0     / bitmap: alien holding a human?
   alIR:nAL#0     / bitmap: alien in range of target?
+  alBE:nAL#0     / bitmap: alien beam engaged?
   phXY:()        / phaser blast locations (xy)
   phDX:()]       / phaser blast directions (delta xy, where y=0)
 
@@ -66,17 +67,22 @@ tick: {
   x[`shXY]+: shSpd*dir
 
 
-  / stage 0: aliens drift down while centering in on target
-  s0: & ix: ~(hh: x[`alHH]) | ir:x[`alIR]
-
-  / !! working around dmend bug: https://github.com/JohnEarnest/ok/issues/95
+  / !! ----- work around dmend bug: https://github.com/JohnEarnest/ok/issues/95
   alX:x[`alX]; tgtX:x[`tgtX]; alY:x[`alY]
+
+  / stage 0: aliens drift down while centering in on target
+  s0: & ~ x[`alHH] | x[`alIR]
   alX[s0]+: alSpd * sgn' tgtX[s0] - alX[s0]
   alY[s0]: bad & alSpd + alY[s0]
-  x[`alX`alY]:(alX; alY)
-  / !! /workaround
 
-  x[`alIR]: ix & bad = _ x[`alY]
+  / stage 1: engage tractor beams when in range
+  x[`alIR]: (bad = _ alY) & 1 > abs[alX-tgtX]
+  engage: x[`alIR] > x[`alHH]  / bit vector: where to engage beams
+  x[`alHH]|:engage
+  x[`alBE]|:engage
+
+  x[`alX`alY]:(alX; alY)
+  / !! ----- /workaround
 
   x[`phXY]+: x[`phDX]
   $[" " in keys; x[`phXY`phDX],:(,x[`shXY]+22 18;,(phSpd*d),0); `] / pew pew
