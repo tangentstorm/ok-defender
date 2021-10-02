@@ -59,7 +59,8 @@ once: [camXY: 0 0 / camera coordinates
 / find a target human (x coord) for each alien
 alW:#*alien0
 huW:#*human
-once[`tgtX]: (-0.5*alW-huW)+ once[`alX] {y@t?&/t:abs[x-y]}\: (*:'once[`huXY])
+tgtOfs: -0.5*alW-huW
+once[`tgtX]: tgtOfs + once[`alX] {y@t?&/t:abs[x-y]}\: (*:'once[`huXY])
 
 sgn: {$[x=0;0;abs[x]%x]}
 tick: {
@@ -81,6 +82,8 @@ tick: {
   engage: x[`alIR] > x[`alHH]  / bit vector: where to engage beams
   x[`alHH]|:engage
   x[`alBE]|:engage
+  / find humans at those x coordinates
+  x[`huXY]@: (!#x`huXY) ^ (*:'x`huXY)?(-tgtOfs)+tgtX@&engage
 
   x[`alX`alY]:(alX; alY)
   / !! ----- /workaround
