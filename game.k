@@ -7,10 +7,14 @@
 
 fc:48 / framecount for animated gif recorder
 
-/-- setup
+/-- constants
 w: 320; h: 200
 shSpd: 8
+alYSpd: 0.3
 phSpd: _shSpd*2.5
+seaLevel: 20
+beamRange: 32
+beamActivationDepth: h - beamRange+seaLevel+#human
 
 / "world" is about 5 screens.
 / exact number comes from random terrain generation
@@ -25,7 +29,7 @@ band: { (box[0;30*x;w;30]; ("transparent";solarized@x)) }
 sky: band@'!6
 gndC: ("#b58900";"#859900";"#cb4b16")
 gndX:-1_0,+\gndW
-gndH: _20+20*pn[0.1;0.1;]'?#gndW
+gndH: _seaLevel+20*pn[0.1;0.1;]'?#gndW
 gnd: (box'[gndX;200-gndH;gndW;gndH])
 gnd: gnd {(x;("transparent";y))}' (#gnd)?gndC
 
@@ -37,22 +41,31 @@ spawnHumans: {
   hy: 200-gndH+#human
   hx,'hy }
 
-/ -- add aliens to the list of aliens
-spawnAliens: {[n;alXY] alXY,(n?worldW),'0}
-
 / -- inital setup
+nInitAliens: 5
 once: [camXY: 0 0 / camera coordinates
   shXY:50 50     / ship coordinates
   shD:1          / ship direction
   huXY:spawnHumans[]
-  alXY:spawnAliens[5;()]
+  alX:nInitAliens?worldW
+  alY:nInitAliens#0
   phXY:()        / phaser blast locations (xy)
   phDX:()]       / phaser blast directions (delta xy, where y=0)
 
+/ find a target human (x coord) for each alien
+alW:#*alien0
+huW:#*human
+once[`tgtX]: (-0.5*alW-huW)+ once[`alX] {y@t?&/t:abs[x-y]}\: (*:'once[`huXY])
+
+sgn: {$[x=0;0;abs[x]%x]}
 tick: {
   x[`camXY]-: (shSpd, 0) * dir
   x[`shD]: d: (-1; x[`shD];1)[1+*dir]
   x[`shXY]+: shSpd*dir
+
+  x[`alX]+: sgn' x[`tgtX] - x[`alX]
+  x[`alY]: beamActivationDepth & alYSpd + x[`alY]
+
   x[`phXY]+: x[`phDX]
   $[" " in keys; x[`phXY`phDX],:(,x[`shXY]+22 18;,(phSpd*d),0); `] / pew pew
   x}
@@ -74,14 +87,14 @@ shipTL: |:'shipTR
 phaserL:|:phaserR: 3 4 7 8
 stop: [shipTL:`shipSL; shipTR:`shipSR
        shipSL:`shipSL; shipSR:`shipSR]
-
+once[`a]
 draw: {
   s: `shipTL`shipTR[x[`shD]=1]
 
   / -- items in this section move in world space
   r:((,x[`shXY]; `arne; $[abs[*dir]; s; stop[s]])
      (x[`phXY]; `arne; `phaserR)
-     (x[`alXY]; `arne; `alien0)
+     (+x[`alX`alY]; `arne; `alien0)
      (x[`huXY];`arne;`human))
   r,:gnd
   r:.[r;(;0); +'\:; x[`camXY]]
