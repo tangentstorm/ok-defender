@@ -1,3 +1,5 @@
+/ DEFENDER clone in oK/iKe for Ludum Dare 49
+/ -------------------------------------------
 /i shipSR;arne;http://games.tangentcode.com/ld49/sprites/ship-stop-r.png
 /i shipTR;arne;http://games.tangentcode.com/ld49/sprites/ship-thrust-r.png
 /i alien0;arne;http://games.tangentcode.com/ld49/sprites/alien0.png
@@ -17,16 +19,18 @@ phaserL:|:phaserR: 3 4 7 8
 stop: [shipTL:`shipSL; shipTR:`shipSR
        shipSL:`shipSL; shipSR:`shipSR]
 
-once: [xy:50 50
+once: [camXY: 0 0 / camera coordinates
+  shXY:50 50 / ship coordinates
   shD:1          / ship direction
   phxy:()        / phaser blast locations (xy)
   phdx:()]       / phaser blast directions (delta xy, where y=0)
 
 tick: {
+  x[`camXY]-: (shSpd, 0) * dir
   x[`shD]: d: (-1; x[`shD];1)[1+*dir]
-  x[`xy]+: shSpd*dir
+  x[`shXY]+: shSpd*dir
   x[`phxy]+: x[`phdx]
-  $[" " in keys; x[`phxy`phdx],:(,x[`xy]+22 18;,(phSpd*d),0); `] / pew pew
+  $[" " in keys; x[`phxy`phdx],:(,x[`shXY]+22 18;,(phSpd*d),0); `] / pew pew
   x}
 
 
@@ -41,11 +45,15 @@ n:16; ground: (box[;180;20;20]@'20*!n) {(x;("black";y))}' earth@n?3
 
 draw: {
   s: `shipTL`shipTR[x[`shD]=1]
- sky,((x[`xy]; `arne; $[abs[*dir]; s; stop[s]])
-  (x[`phxy]; `arne; `phaserR)
-  (200 5; `arne; `alien0)
-  (152 92;`arne;`person)),ground}
+
+  r:((,x[`shXY]; `arne; $[abs[*dir]; s; stop[s]])
+     (x[`phxy]; `arne; `phaserR)
+     (,200 5; `arne; `alien0)
+     (,152 92;`arne;`person))
+  r,:ground
+  r:.[r;(;0); +'\:; x[`camXY]]
+  / sky is fixed gradient. others are drawn relative to camera
+  :sky,r}
+
  /(;      ;~,/'+text@" "/$dir)    )}
  /(;`arne;~,/'+text@","/ 0,$ keys))} / uncomment to show keys
-
-
