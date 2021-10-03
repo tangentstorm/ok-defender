@@ -68,7 +68,7 @@ once[`tgtX]: tgtOfs + alX {y@t?&/t:abs[x-y]}\: (*:'once[`huXY])
 wh: |-1_#:'*:\   / width and height of a sprite (reverse of shape)
 overlap:{[whA;whB;xyA;xyB]&/(xyA,xyB)<(xyB,xyA)+whB,whA}
 collide:{ / called after all movement is done for the frame
-  overlap[wh phaserR;wh alien0]\:/:[phXY;+(alX;alY)]
+  ov:overlap[wh phaserR;wh alien0]; ov\:/:[phXY;+(alX;alY)]
   :x}
 
 sgn: {$[x=0;0;abs[x]%x]}
@@ -99,7 +99,7 @@ tick: {
 
   phXY+:: phDX / move phaser blasts
 
-  /x:collide[x]
+  x:collide[x]
 
   (" " in keys) shoot[x`shXY]/d / shoot if space is down
   x}
