@@ -43,30 +43,32 @@ spawnHumans: {
   hx,'hy }
 
 / -- inital setup
-nAL: 5
 once: [camXY: 0 0 / camera coordinates
   shXY:50 50     / ship coordinates
   shD:1          / ship direction
-  huXY:spawnHumans[]
-  alX:nAL?worldW
-  alY:nAL#0
-  alHH:nAL#0     / bitmap: alien holding a human?
-  alIR:nAL#0     / bitmap: alien in range of target?
-  alBE:nAL#0]     / bitmap: alien beam engaged?
+  huXY:spawnHumans[]]
+
+nAL:5
+alX:nAL?worldW
+alY:nAL#0
+alHH:nAL#0     / bitmap: alien holding a human?
+alIR:nAL#0     / bitmap: alien in range of target?
+alBE:nAL#0     / bitmap: alien beam engaged?
+
 phXY:()        / phaser blast locations (xy)
-phDX:()       / phaser blast directions (delta xy, where y=0)
+phDX:()        / phaser blast directions (delta xy, where y=0)
 
 / find a target human (x coord) for each alien
 alW:#*alien0
 huW:#*human
 tgtOfs: -0.5*alW-huW
-once[`tgtX]: tgtOfs + once[`alX] {y@t?&/t:abs[x-y]}\: (*:'once[`huXY])
+once[`tgtX]: tgtOfs + alX {y@t?&/t:abs[x-y]}\: (*:'once[`huXY])
 
 / collision detection
 wh: |-1_#:'*:\   / width and height of a sprite (reverse of shape)
 overlap:{[whA;whB;xyA;xyB]&/(xyA,xyB)<(xyB,xyA)+whB,whA}
 collide:{ / called after all movement is done for the frame
-  overlap[wh phaserR;wh alien0]\:/:[phXY;+x`alX`alY]
+  overlap[wh phaserR;wh alien0]\:/:[phXY;+(alX;alY)]
   :x}
 
 sgn: {$[x=0;0;abs[x]%x]}
@@ -76,24 +78,23 @@ tick: {
   x[`shXY]+: shSpd*dir
 
   / !! ----- workaround dmend bug: https://github.com/JohnEarnest/ok/issues/95
-  alX:x[`alX]; tgtX:x[`tgtX]; alY:x[`alY]
+  tgtX:x[`tgtX];
 
   / stage 0: aliens drift down while centering in on target
-  s0: & ~ x[`alHH] | x[`alIR]
-  alX[s0]+: alSpd * sgn' tgtX[s0] - alX[s0]
-  alY[s0]: bad & alSpd + alY[s0]
+  s0: & ~ alHH | alIR
+  alX[s0]+:: alSpd * sgn' tgtX[s0] - alX[s0]
+  alY[s0]:: bad & alSpd + alY[s0]
 
   / stage 1: engage tractor beams when in range
-  x[`alIR]: (bad = _ alY) & 1 > abs[alX-tgtX]
-  engage: x[`alIR] > x[`alHH]  / bit vector: where to engage beams
-  x[`alHH]|:engage
-  x[`alBE]|:engage
+  alIR:: (bad = _ alY) & 1 > abs[alX-tgtX]
+  engage: alIR > alHH  / bit vector: where to engage beams
+  alHH|::engage
+  alBE|::engage
   / find humans at those x coordinates, and remove from display list
   x[`huXY]@: (!#x`huXY) ^ (*:'x`huXY)?(-tgtOfs)+tgtX@&engage
 
   / stage 2: aliens take humans into the sky
-  alY[& x[`alHH]]-: alSpd
-  x[`alX`alY]:(alX; alY)
+  alY[& alHH]-:: alSpd
   / !! ----- /workaround
 
   phXY+:: phDX / move phaser blasts
@@ -131,9 +132,9 @@ draw: {
   s: `shipTL`shipTR[x[`shD]=1]
 
   / -- items in this section move in world space
-  alXY: +x[`alX`alY]
+  alXY: +(alX;alY)
   r:((x[`huXY];       a; `human)
-     (bmOfs +/: alXY@&x[`alBE]; a; `beam)
+     (bmOfs +/: alXY@&alBE; a; `beam)
      (alXY;           a; `alien0)
      (,x[`shXY];      a; $[abs[*dir]; s; stop[s]])
      (phXY;       a; `phaserR))
