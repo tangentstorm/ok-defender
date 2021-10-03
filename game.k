@@ -21,17 +21,18 @@ worldW: w * 5   / initial width of world
 fib:5{x,+/-2#x}/1 1 / first few fibonacci numbers
 gndW: {(1+*&worldW<+\x)#x}20*fib@50?#fib
 worldW: +/ gndW / refine width to exact match
+wrap:{(worldW,h)!'x}
 
 / -- terrain generation ---
 box: {[x;y;w;h](x,y)+/:(0 0;w,0;w,h;0,h)}
 band: { (box[0;30*x;w;30]; ("transparent";solarized@x)) }
 sky: band@'!6
 gndC: ("#b58900";"#859900";"#cb4b16")
+gndW,:gndW  / copy twice for wrapping
 gndX:-1_0,+\gndW
 gndH: _seaLevel+20*pn[0.1;0.1;]'?#gndW
 gnd: (box'[gndX;200-gndH;gndW;gndH])
-gnd: gnd {(x;("transparent";y))}' (#gnd)?gndC
-
+gnd: gnd {(x;("transparent";y))}' c,c:(0.5*#gndW)?gndC / color copies the same
 
 / -- add humans to the terrain
 spawnHumans: {
@@ -97,9 +98,8 @@ collide:{ / called after all movement is done for the frame
 
 sgn: {$[x=0;0;abs[x]%x]}
 tick: {
-  camXY-:: (shSpd, 0) * dir
   shD:: (-1; shD;1)[1+*dir]
-  shXY+:: shSpd*dir
+  shXY:: wrap shXY+ shSpd*dir
 
   / stage 0: aliens drift down while centering in on target
   s0: & ~ alHH | alIR
@@ -115,7 +115,7 @@ tick: {
   huXY@:: (!#huXY) ^ (*:'huXY)?(-tgtOfs)+alTX@&engage
 
   alY[& alHH]-:: alSpd  / stage 2: aliens holding humans ruturn to space
-  phXY+:: phDX; rmPH[1>phTL-:: 1]  / move and cull phaser blasts
+  phXY:: wrap@' phXY+phDX; rmPH[1>phTL-:: 1]  / move and cull phaser blasts
   $[#fhXY;fhXY::fhXY+\:0 1;`]; $[0=4!f;falling::+|falling;`]  / falling humans
   collide[]
 
@@ -142,25 +142,38 @@ bmOfs: 8 20 / beam offset from upper left of alien ship
 stop: [shipTL:`shipSL; shipTR:`shipSR
        shipSL:`shipSL; shipSR:`shipSR]
 
-draw: {
-  a:`arne
-  s:`shipTL`shipTR[shD=1]
-
-  / -- items in this section move in world space
+/ -- items in this section move in world space
+spriteLayer:{
+  a:`arne; s:`shipTL`shipTR[shD=1]
   alXY: +(alX;alY)
-  r:((huXY;       a; `human)
-     (fhXY;       a; `falling)
-     (bmOfs +/: alXY@&alBE; a; `beam)
-     (alXY;       a; `alien0)
-     (,shXY;      a; $[abs[*dir]; s; stop[s]])
-     (phXY;       a; `phaserR))
+  :((huXY;       a; `human)
+    (fhXY;       a; `falling)
+    (bmOfs +/: alXY@&alBE; a; `beam)
+    (alXY;       a; `alien0)
+    (,shXY;      a; $[abs[*dir]; s; stop[s]])
+    (phXY;       a; `phaserR))}
+
+/ r:spriteLayer[]; copyLeftSide[r]
+copyLeftSide:{[r]
+  t:&:'w>*:''r[;0]   / indices in each sprite group
+  i:&0<#:'t          / indices of non-empty groups in r
+  pal:r[i;1];  spr:r[i;2]
+  xys:((worldW,0)+/:/: r[i;0]@'t@i)
+  +(xys;pal;spr)}
+
+draw: {
+  camXY:: wrap camXY+ (shSpd, 0) * dir
+  r:spriteLayer[]
+  / if seam in view, copy left side of the world
+  $[worldW<w+cx:*camXY; r,:copyLeftSide[r]; `]
   r,:gnd
-  r:.[r;(;0); +'\:; camXY]
+  r:.[r;(;0); -'\:; camXY]
 
   / -- everything below is fixed in place on-screen
   r,:minimap x
   r:sky,r
   / -- debug helpers:
+  / r,:,(;;~,/'+text@","/$camXY) / debug: show 'camXY'
   / r,:,(2 190;;~,/'+text@" "/$dir) / debug: show 'dir'
   / r,:,(50 190;;~,/'+text@","/ 0,$ keys) / debug: show presesd keys
   :r}
