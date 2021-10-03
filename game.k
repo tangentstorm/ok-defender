@@ -43,9 +43,9 @@ huXY:spawnHumans[]
 fhXY:()
 
 / -- inital setup
-once: [camXY: 0 0 / camera coordinates
-  shXY:50 50     / ship coordinates
-  shD:1]         / ship direction
+camXY:0 0       / camera coordinates
+shXY:50 50      / ship coordinates
+shD:1           / ship direction
 
 / -- aliens --
 nAL:5
@@ -93,14 +93,13 @@ SHvFH:{ rmFH@|/x }
 collide:{ / called after all movement is done for the frame
   / - phasers vs aliens: h: list of aliens hit, per phaser
   $[#cm:colmat[phaserR;alien0;phXY;+(alX;alY)]; PHvAL@cm;`]
-  $[#cm:colmat[shipSR;falling;,x`shXY;fhXY]; SHvFH@cm;`]
-  :x}
+  $[#cm:colmat[shipSR;falling;,shXY;fhXY]; SHvFH@cm;`]}
 
 sgn: {$[x=0;0;abs[x]%x]}
 tick: {
-  x[`camXY]-: (shSpd, 0) * dir
-  x[`shD]: d: (-1; x[`shD];1)[1+*dir]
-  x[`shXY]+: shSpd*dir
+  camXY-:: (shSpd, 0) * dir
+  shD:: (-1; shD;1)[1+*dir]
+  shXY+:: shSpd*dir
 
   / stage 0: aliens drift down while centering in on target
   s0: & ~ alHH | alIR
@@ -118,9 +117,9 @@ tick: {
   alY[& alHH]-:: alSpd  / stage 2: aliens holding humans ruturn to space
   phXY+:: phDX; rmPH[1>phTL-:: 1]  / move and cull phaser blasts
   $[#fhXY;fhXY::fhXY+\:0 1;`]; $[0=4!f;falling::+|falling;`]  / falling humans
-  x:collide[x]
+  collide[]
 
-  (" " in keys) shoot[x`shXY]/d / shoot if space is down
+  (" " in keys) shoot[shXY]/shD / shoot if space is down
   x}
 
 
@@ -145,18 +144,18 @@ stop: [shipTL:`shipSL; shipTR:`shipSR
 
 draw: {
   a:`arne
-  s: `shipTL`shipTR[x[`shD]=1]
+  s:`shipTL`shipTR[shD=1]
 
   / -- items in this section move in world space
   alXY: +(alX;alY)
   r:((huXY;       a; `human)
      (fhXY;       a; `falling)
      (bmOfs +/: alXY@&alBE; a; `beam)
-     (alXY;           a; `alien0)
-     (,x[`shXY];      a; $[abs[*dir]; s; stop[s]])
+     (alXY;       a; `alien0)
+     (,shXY;      a; $[abs[*dir]; s; stop[s]])
      (phXY;       a; `phaserR))
   r,:gnd
-  r:.[r;(;0); +'\:; x[`camXY]]
+  r:.[r;(;0); +'\:; camXY]
 
   / -- everything below is fixed in place on-screen
   r,:minimap x
