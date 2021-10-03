@@ -6,17 +6,17 @@
 /i human;arne;http://games.tangentcode.com/ld49/sprites/human.png
 /i beam;arne;http://games.tangentcode.com/ld49/sprites/beam.png
 
-fc:48 / framecount for animated gif recorder
+/ utils
+sgn: {$[x=0;0;abs[x]%x]}
 
-/-- constants
-w: 320; h: 200
-shSpd: 8
+/ == setup =====================================================================
+fc:48 / framecount for animated gif recorder
+w: 320; h: 200 / screen size
 seaLevel: 20
 beamRange: 32
 bad: h - beamRange+seaLevel+#human  / beam Activation Depth
 
-/ "world" is about 5 screens.
-/ exact number comes from random terrain generation
+/ "world" is about 5 screens. exact number comes from random terrain generation
 worldW: w * 5   / initial width of world
 fib:5{x,+/-2#x}/1 1 / first few fibonacci numbers
 gndW: {(1+*&worldW<+\x)#x}20*fib@50?#fib
@@ -34,19 +34,19 @@ gndH: _seaLevel+20*pn[0.1;0.1;]'?#gndW
 gnd: (box'[gndX;200-gndH;gndW;gndH])
 gnd: gnd {(x;("transparent";y))}' c,c:(0.5*#gndW)?gndC / color copies the same
 
-/ -- add humans to the terrain
+/ -- humans --
 spawnHumans: {
   hw: #*human
   hx: gndX + 0.5*gndW-hw  / x center of each tile
   hy: 200-gndH+#human
   hx,'hy }
 huXY:spawnHumans[]
-fhXY:()
+fhXY:() / falling humans
 
-/ -- inital setup
-camXY:0 0       / camera coordinates
+/ -- ship --
 shXY:50 50      / ship coordinates
 shD:1           / ship direction
+shSpd: 8
 
 / -- aliens --
 nAL:5
@@ -75,7 +75,8 @@ shoot:{[shXY;d] / spawn phaser given shipxy and x direction
   phXY,:: ,shXY+phOfs
   phDX,:: ,(phSpd*d),0}
 
-/ collision detection
+/ === collision detection =================================================
+
 wh: |-1_#:'*:\   / width and height of a sprite (reverse of shape)
 overlap:{[whA;whB;xyA;xyB]&/(xyA,xyB)<(xyB,xyA)+whB,whA}
 colmat:{[sprA;sprB;xysA;xysB] / collision matrix
@@ -83,20 +84,18 @@ colmat:{[sprA;sprB;xysA;xysB] / collision matrix
     {ov:overlap[wh sprA;wh sprB]; ov/:\:[xysA;xysB]}[] ]}
 
 / collision handlers take the collision matrix
-PHvAL:{
-  / dead aliens holding humans drop their humans
+PHvAL:{ / phasers vs aliens: dead aliens holding humans drop their humans
   $[|/drop:alHH&alXX:|/x; fhXY,:: (-tgtOfs;2+#alien0) +/: (+(alX;alY))@&drop; `]
   rmPH@|/'x; rmAL@alXX }
 
+SHvFH:{ rmFH@|/x } / ship vs falling humans (ship catches them)
 rmFH:{[bits] keep:&~bits; fhXY@::keep }
-SHvFH:{ rmFH@|/x }
 
+/ -- run all the collision tests
 collide:{ / called after all movement is done for the frame
-  / - phasers vs aliens: h: list of aliens hit, per phaser
   $[#cm:colmat[phaserR;alien0;phXY;+(alX;alY)]; PHvAL@cm;`]
   $[#cm:colmat[shipSR;falling;,shXY;fhXY]; SHvFH@cm;`]}
 
-sgn: {$[x=0;0;abs[x]%x]}
 tick: {
   shD:: (-1; shD;1)[1+*dir]
   shXY:: wrap shXY+ shSpd*dir
@@ -108,9 +107,9 @@ tick: {
 
   / stage 1: engage tractor beams when in range
   alIR:: (bad = _ alY) & 1 > abs[alX-alTX]
-  engage: alIR > alHH  / bit vector: where to engage beams
+  alBE|::engage: alIR > alHH  / bit vector: where to engage beams
   alHH|::engage
-  alBE|::engage
+
   / find humans at those x coordinates, and remove from display list
   huXY@:: (!#huXY) ^ (*:'huXY)?(-tgtOfs)+alTX@&engage
 
@@ -122,7 +121,11 @@ tick: {
   (" " in keys) shoot[shXY]/shD / shoot if space is down
   x}
 
+/ ==== display logic ========================================================
 
+camXY:0 0       / camera coordinates
+
+/ -- minimap --
 mapw: 120; maph: 15; mapy: 5
 mapbc: ("white";"black") / map box color
 mapcc: (solarized@2;"black") / map cam color
@@ -130,8 +133,6 @@ minimap: {
   cw: mapw%5 / cam width on the minimap
   ((box[(w-mapw)%2;mapy;mapw;maph];mapbc)
    (box[(w-cw)%2;mapy+1;cw;maph-2];mapcc))}
-
-
 
 /-- sprites --
 shipSL: |:'shipSR
@@ -153,8 +154,7 @@ spriteLayer:{
     (,shXY;      a; $[abs[*dir]; s; stop[s]])
     (phXY;       a; `phaserR))}
 
-/ r:spriteLayer[]; copyLeftSide[r]
-copyLeftSide:{[r]
+copyLeftSide:{[r]    / render-time only
   t:&:'w>*:''r[;0]   / indices in each sprite group
   i:&0<#:'t          / indices of non-empty groups in r
   pal:r[i;1];  spr:r[i;2]
