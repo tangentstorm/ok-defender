@@ -11,7 +11,7 @@ fc:48 / framecount for animated gif recorder
 /-- constants
 w: 320; h: 200
 shSpd: 8
-alSpd: 1.3
+alSpd: 0.5
 phSpd: _shSpd*2.5
 seaLevel: 20
 beamRange: 32
@@ -82,8 +82,12 @@ tick: {
   engage: x[`alIR] > x[`alHH]  / bit vector: where to engage beams
   x[`alHH]|:engage
   x[`alBE]|:engage
-  / find humans at those x coordinates
+  / find humans at those x coordinates, and remove from display list
   x[`huXY]@: (!#x`huXY) ^ (*:'x`huXY)?(-tgtOfs)+tgtX@&engage
+
+  / stage 2: aliens take humans into the sky
+  alY[& x[`alHH]]-: alSpd
+
 
   x[`alX`alY]:(alX; alY)
   / !! ----- /workaround
@@ -117,11 +121,11 @@ draw: {
 
   / -- items in this section move in world space
   alXY: +x[`alX`alY]
-  r:((,x[`shXY];      a; $[abs[*dir]; s; stop[s]])
-     (x[`phXY];       a; `phaserR)
+  r:((x[`huXY];       a; `human)
      (bmOfs +/: alXY@&x[`alBE]; a; `beam)
      (alXY;           a; `alien0)
-     (x[`huXY];       a; `human))
+     (,x[`shXY];      a; $[abs[*dir]; s; stop[s]])
+     (x[`phXY];       a; `phaserR))
   r,:gnd
   r:.[r;(;0); +'\:; x[`camXY]]
 
