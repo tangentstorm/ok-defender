@@ -62,14 +62,20 @@ huW:#*human
 tgtOfs: -0.5*alW-huW
 once[`tgtX]: tgtOfs + once[`alX] {y@t?&/t:abs[x-y]}\: (*:'once[`huXY])
 
+/ collision detection
+wh: |-1_#:'*:\   / width and height of a sprite (reverse of shape)
+overlap:{[whA;whB;xyA;xyB]&/(xyA,xyB)<(xyB,xyA)+whB,whA}
+collide:{ / called after all movement is done for the frame
+  overlap[wh phaserR;wh alien0]\:/:[x`phXY;+x`alX`alY]
+  :x}
+
 sgn: {$[x=0;0;abs[x]%x]}
 tick: {
   x[`camXY]-: (shSpd, 0) * dir
   x[`shD]: d: (-1; x[`shD];1)[1+*dir]
   x[`shXY]+: shSpd*dir
 
-
-  / !! ----- work around dmend bug: https://github.com/JohnEarnest/ok/issues/95
+  / !! ----- workaround dmend bug: https://github.com/JohnEarnest/ok/issues/95
   alX:x[`alX]; tgtX:x[`tgtX]; alY:x[`alY]
 
   / stage 0: aliens drift down while centering in on target
@@ -87,12 +93,12 @@ tick: {
 
   / stage 2: aliens take humans into the sky
   alY[& x[`alHH]]-: alSpd
-
-
   x[`alX`alY]:(alX; alY)
   / !! ----- /workaround
 
-  x[`phXY]+: x[`phDX]
+  x[`phXY]+: x[`phDX] / move phaser blasts
+
+  /x:collide[x]
   $[" " in keys; x[`phXY`phDX],:(,x[`shXY]+22 18;,(phSpd*d),0); `] / pew pew
   x}
 
@@ -110,8 +116,8 @@ minimap: {
 /-- sprites --
 shipSL: |:'shipSR
 shipTL: |:'shipTR
-phaserL:|:phaserR: 3 4 7 8
-bmOfs: 10 22 / beam offset from upper left of alien ship
+phaserL:|:'phaserR: ,3 4 7 8
+bmOfs: 8 20 / beam offset from upper left of alien ship
 stop: [shipTL:`shipSL; shipTR:`shipSR
        shipSL:`shipSL; shipSR:`shipSR]
 
