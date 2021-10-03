@@ -87,9 +87,13 @@ PHvAL:{
   $[|/drop:alHH&alXX:|/x; fhXY,:: (-tgtOfs;2+#alien0) +/: (+(alX;alY))@&drop; `]
   rmPH@|/'x; rmAL@alXX }
 
+rmFH:{[bits] keep:&~bits; fhXY@::keep }
+SHvFH:{ rmFH@|/x }
+
 collide:{ / called after all movement is done for the frame
   / - phasers vs aliens: h: list of aliens hit, per phaser
-  $[#cm:colmat[phaserR;alien0;phXY;+(alX;alY)]; PHvAL[cm];`]
+  $[#cm:colmat[phaserR;alien0;phXY;+(alX;alY)]; PHvAL@cm;`]
+  $[#cm:colmat[shipSR;falling;,x`shXY;fhXY]; SHvFH@cm;`]
   :x}
 
 sgn: {$[x=0;0;abs[x]%x]}
