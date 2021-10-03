@@ -39,12 +39,12 @@ spawnHumans: {
   hx: gndX + 0.5*gndW-hw  / x center of each tile
   hy: 200-gndH+#human
   hx,'hy }
+huXY:spawnHumans[]
 
 / -- inital setup
 once: [camXY: 0 0 / camera coordinates
   shXY:50 50     / ship coordinates
-  shD:1          / ship direction
-  huXY:spawnHumans[]]
+  shD:1]         / ship direction
 
 / -- aliens --
 nAL:5
@@ -56,7 +56,7 @@ alHH:nAL#0      / bitmap: alien holding a human?
 alIR:nAL#0      / bitmap: alien in range of target?
 alBE:nAL#0      / bitmap: alien beam engaged?
 / find a target human (x coord) for each alien:
-alTX: tgtOfs + alX {y@t?&/t:abs[x-y]}\: (*:'once[`huXY])
+alTX: tgtOfs + alX {y@t?&/t:abs[x-y]}\: *:'huXY
 rmAL: {[bits] keep:&~bits / remove aliens where bits=1
   alX@::keep; alY@::keep; alHH@::keep; alIR@::keep; alBE@::keep; alTX@::keep; `}
 
@@ -102,7 +102,7 @@ tick: {
   alHH|::engage
   alBE|::engage
   / find humans at those x coordinates, and remove from display list
-  x[`huXY]@: (!#x`huXY) ^ (*:'x`huXY)?(-tgtOfs)+alTX@&engage
+  huXY@:: (!#huXY) ^ (*:'huXY)?(-tgtOfs)+alTX@&engage
 
   alY[& alHH]-:: alSpd  / stage 2: aliens holding humans ruturn to space
   phXY+:: phDX; rmPH[1>phTL-:: 1]  / move and cull phaser blasts
@@ -137,7 +137,7 @@ draw: {
 
   / -- items in this section move in world space
   alXY: +(alX;alY)
-  r:((x[`huXY];       a; `human)
+  r:((huXY;       a; `human)
      (bmOfs +/: alXY@&alBE; a; `beam)
      (alXY;           a; `alien0)
      (,x[`shXY];      a; $[abs[*dir]; s; stop[s]])
