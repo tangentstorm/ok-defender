@@ -52,9 +52,9 @@ once: [camXY: 0 0 / camera coordinates
   alY:nAL#0
   alHH:nAL#0     / bitmap: alien holding a human?
   alIR:nAL#0     / bitmap: alien in range of target?
-  alBE:nAL#0     / bitmap: alien beam engaged?
-  phXY:()        / phaser blast locations (xy)
-  phDX:()]       / phaser blast directions (delta xy, where y=0)
+  alBE:nAL#0]     / bitmap: alien beam engaged?
+phXY:()        / phaser blast locations (xy)
+phDX:()       / phaser blast directions (delta xy, where y=0)
 
 / find a target human (x coord) for each alien
 alW:#*alien0
@@ -66,7 +66,7 @@ once[`tgtX]: tgtOfs + once[`alX] {y@t?&/t:abs[x-y]}\: (*:'once[`huXY])
 wh: |-1_#:'*:\   / width and height of a sprite (reverse of shape)
 overlap:{[whA;whB;xyA;xyB]&/(xyA,xyB)<(xyB,xyA)+whB,whA}
 collide:{ / called after all movement is done for the frame
-  overlap[wh phaserR;wh alien0]\:/:[x`phXY;+x`alX`alY]
+  overlap[wh phaserR;wh alien0]\:/:[phXY;+x`alX`alY]
   :x}
 
 sgn: {$[x=0;0;abs[x]%x]}
@@ -96,12 +96,17 @@ tick: {
   x[`alX`alY]:(alX; alY)
   / !! ----- /workaround
 
-  x[`phXY]+: x[`phDX] / move phaser blasts
+  phXY+:: phDX / move phaser blasts
 
   /x:collide[x]
-  $[" " in keys; x[`phXY`phDX],:(,x[`shXY]+22 18;,(phSpd*d),0); `] / pew pew
+
+  (" " in keys) shoot[x`shXY]/d / shoot if space is down
   x}
 
+phOfs: 22 18
+shoot:{[shXY;d] / spawn phaser given shipxy and x direction
+  phXY,:: ,shXY+phOfs
+  phDX,:: ,(phSpd*d),0}
 
 mapw: 120; maph: 15; mapy: 5
 mapbc: ("white";"black") / map box color
@@ -131,7 +136,7 @@ draw: {
      (bmOfs +/: alXY@&x[`alBE]; a; `beam)
      (alXY;           a; `alien0)
      (,x[`shXY];      a; $[abs[*dir]; s; stop[s]])
-     (x[`phXY];       a; `phaserR))
+     (phXY;       a; `phaserR))
   r,:gnd
   r:.[r;(;0); +'\:; x[`camXY]]
 
