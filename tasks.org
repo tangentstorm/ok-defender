@@ -11,25 +11,61 @@ probably about 5 screens worth  (* 320 5) -> 1600 pixels wide
 * DONE spawn humans (on the ground)
 * DONE spawn initial aliens (in the air)
 * DONE aliens move towards nearest humans
-* TODO aliens abduct humans
-* TODO handle the case where 2 aliens move toward same person
-(once one picks it up, the other must change course)
+* DONE [3/3] aliens abduct humans
+** DONE turn on beam when alen above human
+** DONE remove human from ground once beam is engaged
+** DONE ships should start going back into the sky
+* DONE implement rectangle vs rectangle collisions
+#+begin_src java
+  public boolean overlaps(GsObject that) {
+      return (this.x < that.x2() && this.x2() > that.x &&
+              this.y < that.y2() && this.y2() > that.y); }
+#+end_src
 
-* TODO spawn more aliens over time
+#+begin_src k
+&/(ula<lrb) & (lra>ulb)
+&/(ula<lrb) & (ulb<lra)
+&/(xyA<xyB+whB)&(xyB<xyA+whA)
+&/(xyA,xyB)<(xyB,xyA)+whB,whA
+{[whA;whB;xyA;xyB] &/(xyA,xyB)<(xyB,xyA)+whB,whA}
+#+end_src
 
-* TODO spaceship inertia
-* TODO draw some buildings for people to emerge from.
-* TODO collision detection for ship+alien
-* TODO collision dection for phasers+aliens
-* TODO garbage collect phasers
+* DONE garbage collect phasers
 - when they hit something
 - when they expire (each one should have a clock)
 
+* DONE collision dection for phasers+aliens
+- destroy the alien ship (just delet for now)
+- if alHH, then spawn a falling human (probably 'fh', separate from 'hu')
 
+* DONE shooting an alien that holds a human should drop human
 
+* TODO collision detection for ship + falling human
+* TODO collision detection between ground + falling human
+this should count as a death
+
+* TODO spaceship inertia
+* TODO show aliens on the radar
+* TODO collision detection for ship+alien
+* TODO collision detection for phasers + falling human
+* TODO [#C] collision detection for phasers + beams (with humans)
+* TODO collision detection between ground + ship
+- just don't allow going lower than y=146
+- need to track if you're down there so that you can "drop off" the person
+
+* TODO cool explosion animation when the alien blows up
 * TODO move minimap camera box as ship moves
 * TODO cylindrical topology (with single vertical seam)
 (so you can go all around the world in x direction)
+* TODO maybe break =tick= into smaller functions
+
+* TODO spawn more aliens over time
+* TODO [#A] fix bug that causes spurious crashes when aliens reach bottom
+* TODO [#C] set sprite direction of phasers
+* TODO [#B] handle the case where 2 aliens move toward same person
+(once one picks it up, the other must change course)
+
+* TODO draw some buildings for people to emerge from.
 * TODO [#B] only draw sprites that are on screen
 - select only items that intersect camera
 - have to handle 2 regions if the "seam" is in view
@@ -43,10 +79,6 @@ time survived = f
 * TODO end game when too many people die
 - this is a nihilistic game where you can never
 - win but only prolong the inevitable
-* TODO collision detection between ground + ship
-* TODO collision detection between ground + falling human
-* TODO collision detection for ship + human
-* TODO collision detection for phasers + human
 * TODO screenflow
 ** TODO game over
 ** TODO title screen
