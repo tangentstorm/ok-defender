@@ -11,8 +11,6 @@ fc:48 / framecount for animated gif recorder
 /-- constants
 w: 320; h: 200
 shSpd: 8
-alSpd: 0.5
-phSpd: _shSpd*2.5
 seaLevel: 20
 beamRange: 32
 bad: h - beamRange+seaLevel+#human  / beam Activation Depth
@@ -48,15 +46,26 @@ once: [camXY: 0 0 / camera coordinates
   shD:1          / ship direction
   huXY:spawnHumans[]]
 
+/ -- aliens --
 nAL:5
+alSpd: 0.5
 alX:nAL?worldW
 alY:nAL#0
-alHH:nAL#0     / bitmap: alien holding a human?
-alIR:nAL#0     / bitmap: alien in range of target?
-alBE:nAL#0     / bitmap: alien beam engaged?
+alHH:nAL#0      / bitmap: alien holding a human?
+alIR:nAL#0      / bitmap: alien in range of target?
+alBE:nAL#0      / bitmap: alien beam engaged?
 
-phXY:()        / phaser blast locations (xy)
-phDX:()        / phaser blast directions (delta xy, where y=0)
+/ -- phasers --
+phSpd: _shSpd*1.75
+phTL:()         / phaser time to live
+phXY:()         / phaser blast locations (xy)
+phDX:()         / phaser blast directions (delta xy, where y=0)
+phLT: 24        / phaser lifetime
+phOfs: 22 18
+shoot:{[shXY;d] / spawn phaser given shipxy and x direction
+  phTL,:: phLT
+  phXY,:: ,shXY+phOfs
+  phDX,:: ,(phSpd*d),0}
 
 / find a target human (x coord) for each alien
 alW:#*alien0
@@ -98,16 +107,13 @@ tick: {
   / !! ----- /workaround
 
   phXY+:: phDX / move phaser blasts
+  keep: &0<phTL-:: 1; phXY@::keep; phDX@::keep; phTL@::keep / garbage collect
 
   x:collide[x]
 
   (" " in keys) shoot[x`shXY]/d / shoot if space is down
   x}
 
-phOfs: 22 18
-shoot:{[shXY;d] / spawn phaser given shipxy and x direction
-  phXY,:: ,shXY+phOfs
-  phDX,:: ,(phSpd*d),0}
 
 mapw: 120; maph: 15; mapy: 5
 mapbc: ("white";"black") / map box color
