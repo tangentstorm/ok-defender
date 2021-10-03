@@ -40,6 +40,7 @@ spawnHumans: {
   hy: 200-gndH+#human
   hx,'hy }
 huXY:spawnHumans[]
+fhXY:()
 
 / -- inital setup
 once: [camXY: 0 0 / camera coordinates
@@ -80,9 +81,15 @@ colmat:{[sprA;sprB;xysA;xysB] / collision matrix
   $[0=|/(#xysA;#xysB); ()  / return () if either list is empty
     {ov:overlap[wh sprA;wh sprB]; ov/:\:[xysA;xysB]}[] ]}
 
+/ collision handlers take the collision matrix
+PHvAL:{
+  / dead aliens holding humans drop their humans
+  $[|/drop:alHH&alXX:|/x; fhXY,:: (-tgtOfs;2+#alien0) +/: (+(alX;alY))@&drop; `]
+  rmPH@|/'x; rmAL@alXX }
+
 collide:{ / called after all movement is done for the frame
   / - phasers vs aliens: h: list of aliens hit, per phaser
-  $[#cm:: colmat[phaserR;alien0;phXY;+(alX;alY)]; (rmPH@|/'cm; rmAL@|/cm); `]
+  $[#cm:colmat[phaserR;alien0;phXY;+(alX;alY)]; PHvAL[cm];`]
   :x}
 
 sgn: {$[x=0;0;abs[x]%x]}
@@ -94,7 +101,7 @@ tick: {
   / stage 0: aliens drift down while centering in on target
   s0: & ~ alHH | alIR
   alX[s0]+:: alSpd * sgn' alTX[s0] - alX[s0]
-  alY[s0]:: bad & alSpd + alY[s0]
+  alY[s0]:: bad & (3*alSpd) + alY[s0]
 
   / stage 1: engage tractor beams when in range
   alIR:: (bad = _ alY) & 1 > abs[alX-alTX]
@@ -106,7 +113,7 @@ tick: {
 
   alY[& alHH]-:: alSpd  / stage 2: aliens holding humans ruturn to space
   phXY+:: phDX; rmPH[1>phTL-:: 1]  / move and cull phaser blasts
-
+  $[#fhXY;fhXY::fhXY+\:0 1;`]; $[0=4!f;falling::+|falling;`]  / falling humans
   x:collide[x]
 
   (" " in keys) shoot[x`shXY]/d / shoot if space is down
@@ -126,6 +133,7 @@ minimap: {
 /-- sprites --
 shipSL: |:'shipSR
 shipTL: |:'shipTR
+falling: human
 phaserL:|:'phaserR: ,3 4 7 8
 bmOfs: 8 20 / beam offset from upper left of alien ship
 stop: [shipTL:`shipSL; shipTR:`shipSR
@@ -138,6 +146,7 @@ draw: {
   / -- items in this section move in world space
   alXY: +(alX;alY)
   r:((huXY;       a; `human)
+     (fhXY;       a; `falling)
      (bmOfs +/: alXY@&alBE; a; `beam)
      (alXY;           a; `alien0)
      (,x[`shXY];      a; $[abs[*dir]; s; stop[s]])
