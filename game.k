@@ -103,7 +103,7 @@ tick: {
   / stage 0: aliens drift down while centering in on target
   s0: & ~ alHH | alIR
   alX[s0]+:: alSpd * sgn' alTX[s0] - alX[s0]
-  alY[s0]:: bad & (3*alSpd) + alY[s0]
+  alY[s0]:: bad & (1.5*alSpd) + alY[s0]
 
   / stage 1: engage tractor beams when in range
   alIR:: (bad = _ alY) & 1 > abs[alX-alTX]
@@ -124,15 +124,22 @@ tick: {
 / ==== display logic ========================================================
 
 camXY:0 0       / camera coordinates
+atSeam:{worldW<w+cx:*camXY}  / seam in view?
 
 / -- minimap --
-mapw: 120; maph: 15; mapy: 5
+mapw: 120; maph: 15; mapx: (w-mapw)%2; mapy:5
 mapbc: ("white";"black") / map box color
 mapcc: (solarized@2;"black") / map cam color
 minimap: {
-  cw: mapw%5 / cam width on the minimap
-  ((box[(w-mapw)%2;mapy;mapw;maph];mapbc)
-   (box[(w-cw)%2;mapy+1;cw;maph-2];mapcc))}
+  sf: mapw%worldW / scaling factor
+  cw: sf*w        / cam width on the minimap
+  cx: mapx + co:sf**camXY
+  r:,(box[mapx;mapy;mapw;maph];mapbc)
+  $[atSeam[]
+     c:((box[mapx;mapy+1;cw-mapw-co;maph-2];mapcc)
+        (box[cx;mapy+1;mapw-co;maph-2];mapcc))
+     c:,(box[cx;mapy+1;cw;maph-2];mapcc)]
+  r,c}
 
 /-- sprites --
 shipSL: |:'shipSR
@@ -165,7 +172,7 @@ draw: {
   camXY:: wrap camXY+ (shSpd, 0) * dir
   r:spriteLayer[]
   / if seam in view, copy left side of the world
-  $[worldW<w+cx:*camXY; r,:copyLeftSide[r]; `]
+  $[atSeam[]; r,:copyLeftSide[r]; `]
   r,:gnd
   r:.[r;(;0); -'\:; camXY]
 
