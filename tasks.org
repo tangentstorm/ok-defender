@@ -49,8 +49,8 @@ probably about 5 screens worth  (* 320 5) -> 1600 pixels wide
 - just don't allow going lower than y=146
 
 
+* DONE [#A] fix bug that causes spurious crashes when aliens reach bottom
 
-* TODO [#A] fix bug that causes spurious crashes when aliens reach bottom
 * TODO [#A] show aliens on the radar
 * TODO [#A] spawn more aliens over time
 * TODO [#A] spaceship inertia/drag
