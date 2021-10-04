@@ -40,24 +40,32 @@ probably about 5 screens worth  (* 320 5) -> 1600 pixels wide
 
 * DONE shooting an alien that holds a human should drop human
 
+* TODO cylindrical topology (with single vertical seam)
+(so you can go all around the world in x direction)
+
+
+* TODO [#B] only draw sprites that are on screen
+- select only items that intersect camera
+- have to handle 2 regions if the "seam" is in view
+
+* TODO move minimap camera box as ship moves
+
 * TODO collision detection for ship + falling human
 * TODO collision detection between ground + falling human
 this should count as a death
+* TODO clamp ship in y direction
 
-* TODO spaceship inertia
 * TODO show aliens on the radar
 * TODO collision detection for ship+alien
 * TODO collision detection for phasers + falling human
-* TODO [#C] collision detection for phasers + beams (with humans)
 * TODO collision detection between ground + ship
 - just don't allow going lower than y=146
 - need to track if you're down there so that you can "drop off" the person
 
+* TODO [#C] spaceship inertia
+* TODO [#C] collision detection for phasers + beams (with humans)
 * TODO cool explosion animation when the alien blows up
-* TODO move minimap camera box as ship moves
-* TODO cylindrical topology (with single vertical seam)
-(so you can go all around the world in x direction)
-* TODO maybe break =tick= into smaller functions
+* TODO [#C] maybe break =tick= into smaller functions
 
 * TODO spawn more aliens over time
 * TODO [#A] fix bug that causes spurious crashes when aliens reach bottom
@@ -66,10 +74,6 @@ this should count as a death
 (once one picks it up, the other must change course)
 
 * TODO draw some buildings for people to emerge from.
-* TODO [#B] only draw sprites that are on screen
-- select only items that intersect camera
-- have to handle 2 regions if the "seam" is in view
-
 
 * TODO keep score (maybe time survived, plus #saved?)
 time survived = f
