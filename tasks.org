@@ -39,52 +39,52 @@ probably about 5 screens worth  (* 320 5) -> 1600 pixels wide
 - if alHH, then spawn a falling human (probably 'fh', separate from 'hu')
 
 * DONE shooting an alien that holds a human should drop human
-
-* TODO cylindrical topology (with single vertical seam)
+* DONE collision detection for ship + falling human
+* DONE cylindrical topology (with single vertical seam)
 (so you can go all around the world in x direction)
 
-
-* TODO [#B] only draw sprites that are on screen
-- select only items that intersect camera
-- have to handle 2 regions if the "seam" is in view
-
-* TODO move minimap camera box as ship moves
-
-* TODO collision detection for ship + falling human
-* TODO collision detection between ground + falling human
-this should count as a death
-* TODO clamp ship in y direction
-
-* TODO show aliens on the radar
-* TODO collision detection for ship+alien
-* TODO collision detection for phasers + falling human
-* TODO collision detection between ground + ship
+* DONE move minimap camera box as ship moves
+* DONE clamp ship in y direction
+- can't go higher than bottom of minimap
 - just don't allow going lower than y=146
-- need to track if you're down there so that you can "drop off" the person
 
-* TODO [#C] spaceship inertia
-* TODO [#C] collision detection for phasers + beams (with humans)
-* TODO cool explosion animation when the alien blows up
-* TODO [#C] maybe break =tick= into smaller functions
 
-* TODO spawn more aliens over time
+
 * TODO [#A] fix bug that causes spurious crashes when aliens reach bottom
-* TODO [#C] set sprite direction of phasers
-* TODO [#B] handle the case where 2 aliens move toward same person
+* TODO [#A] show aliens on the radar
+* TODO [#A] spawn more aliens over time
+* TODO [#A] spaceship inertia/drag
+* TODO [#A] handle the case where 2 aliens move toward same person
 (once one picks it up, the other must change course)
+if any duplicates in the list of targets, replace with random targets
+* ---------
+* TODO [#B] track whether ship is carrying a human, and if so, drop off on ground
+- need to track if you're down there so that you can "drop off" the person
+* TODO [#B] collision detection for ship+alien (game over)
+* TODO [#B] collision detection between ground + falling human
+this should count as a death
 
-* TODO draw some buildings for people to emerge from.
-
-* TODO keep score (maybe time survived, plus #saved?)
+* TODO [#B] draw some cities (a city?) where humans are "safe"
+* TODO [#B] scoring: time to saving all living humans
+maybe you win by bringing all surviving humans to the city before you die
+and then your score is your time + #aliens killed - humans killed/abducted
+** TODO keep score (maybe time survived, plus #saved?)
 time survived = f
-
-* TODO draw score (as some kind of clock)
-* TODO count how many people die
-* TODO end game when too many people die
+** TODO draw score (as some kind of clock)
+** TODO count how many people die
+** TODO end game when too many people die (or you crash into alien)
 - this is a nihilistic game where you can never
 - win but only prolong the inevitable
-* TODO screenflow
+
+* TODO [#B] cool explosion animation when the alien blows up
+* TODO [#B] have camera smoothly follow the ship
+* TODO [#C] collision detection for phasers + falling human (toast them)
+* TODO [#C] set sprite direction of phasers
+* TODO [#C] collision detection for phasers + beams (with humans)
+* TODO [#C] only draw sprites that are on screen
+can probably extract most of this logic from copyLeftSide
+
+* TODO [#C] screenflow
 ** TODO game over
 ** TODO title screen
 ** TODO pause screen
-* TODO [#C] have camera smoothly follow the ship
