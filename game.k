@@ -7,7 +7,11 @@
 /i beam;arne;http://games.tangentcode.com/ld49/sprites/beam.png
 
 / utils
-sgn: {$[x=0;0;abs[x]%x]}
+sgn: {(x>0)-x<0}
+kd:ku:kx:kr:kb:lx:ux:md:mu:mm:mg:mm:{} / clear event handlers
+once:() / empty state var
+assert:{[err;t] $[&/t;1;err[]]}
+isFlat:~|/0=@:'  / x contains no lists
 
 / == setup =====================================================================
 fc:48 / framecount for animated gif recorder
@@ -51,7 +55,7 @@ shYMin: 18; shYMax: 146 / for clamping y-coord
 
 / -- aliens --
 nAL:5
-alSpd: 0.5
+alSpd: 1.3 / 0.5
 tgtOfs: -0.5*(#*alien0)-#*human
 alX:nAL?worldW
 alY:nAL#0
@@ -100,12 +104,14 @@ collide:{ / called after all movement is done for the frame
 tick: {
   shD:: (-1; shD;1)[1+*dir]
   shXY:: @[wrap shXY+ shSpd*dir; 1; shYMax&shYMin|]
-
+assert[`flat0;isFlat alX]
+old::[x:(),alX; y:(),alY] / https://github.com/JohnEarnest/ok/issues/97
   / stage 0: aliens drift down while centering in on target
   s0: & ~ alHH | alIR
-  alX[s0]+:: alSpd * sgn' alTX[s0] - alX[s0]
+  $[1=#s0; s0:*s0; `] / workaround for https://github.com/JohnEarnest/ok/issues/96
+  alX[s0]+:: alSpd * sgn alTX[s0] - alX[s0]
   alY[s0]:: bad & (1.5*alSpd) + alY[s0]
-
+assert[`flat1;isFlat alX]
   / stage 1: engage tractor beams when in range
   alIR:: (bad = _ alY) & 1 > abs[alX-alTX]
   alBE|::engage: alIR > alHH  / bit vector: where to engage beams
