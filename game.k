@@ -47,6 +47,7 @@ fhXY:() / falling humans
 shXY:50 50      / ship coordinates
 shD:1           / ship direction
 shSpd: 8
+shYMin: 18; shYMax: 146 / for clamping y-coord
 
 / -- aliens --
 nAL:5
@@ -98,7 +99,7 @@ collide:{ / called after all movement is done for the frame
 
 tick: {
   shD:: (-1; shD;1)[1+*dir]
-  shXY:: wrap shXY+ shSpd*dir
+  shXY:: @[wrap shXY+ shSpd*dir; 1; shYMax&shYMin|]
 
   / stage 0: aliens drift down while centering in on target
   s0: & ~ alHH | alIR
